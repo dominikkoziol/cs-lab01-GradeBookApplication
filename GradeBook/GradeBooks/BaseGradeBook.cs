@@ -9,22 +9,25 @@ using Newtonsoft.Json.Linq;
 
 namespace GradeBook.GradeBooks
 {
-    public class BaseGradeBook
+    public abstract class BaseGradeBook
     {
         public string Name { get; set; }
         public List<Student> Students { get; set; }
-
-        public BaseGradeBook(string name)
+        public bool IsWeighted { get; set; }
+        public GradeBookType Type { get; set; }
+        public BaseGradeBook(string name, bool isWeighted)
         {
             Name = name;
             Students = new List<Student>();
+            IsWeighted = isWeighted;
         }
 
-        public void AddStudent(Student student)
+        public void AddStudent(Student student, bool isWeighted)
         {
             if (string.IsNullOrEmpty(student.Name))
                 throw new ArgumentException("A Name is required to add a student to a gradebook.");
             Students.Add(student);
+            IsWeighted = isWeighted;
         }
 
         public void RemoveStudent(string name)
@@ -53,7 +56,7 @@ namespace GradeBook.GradeBooks
             student.AddGrade(score);
         }
 
-        public void RemoveGrade(string name, double score)
+        public void RemoveGrade(string name, double score) 
         {
             if (string.IsNullOrEmpty(name))
                 throw new ArgumentException("A Name is required to remove a grade from a student.");
@@ -106,20 +109,21 @@ namespace GradeBook.GradeBooks
 
         public virtual double GetGPA(char letterGrade, StudentType studentType)
         {
+            int additionalPoint = studentType == StudentType.DualEnrolled || studentType == StudentType.Honors ? 1 : 0; 
             switch (letterGrade)
             {
                 case 'A':
-                    return 4;
+                    return 4 + additionalPoint;
                 case 'B':
-                    return 3;
+                    return 3 + additionalPoint;
                 case 'C':
-                    return 2;
+                    return 2 + additionalPoint;
                 case 'D':
-                    return 1;
+                    return 1 + additionalPoint;
                 case 'F':
-                    return 0;
+                    return 0 + additionalPoint;
             }
-            return 0;
+            return 0 + additionalPoint;
         }
 
         public virtual void CalculateStatistics()
